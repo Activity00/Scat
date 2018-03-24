@@ -5,9 +5,8 @@
 @time: 2018/1/20 19:14
 """
 import fire
-from tornado import ioloop
 
-from scat.master import MASTER_SERVER_MODE, SINGLE_SERVER_MODE, MULTI_SERVER_MODE
+from scat.distributed.master import MASTER_SERVER_MODE, SINGLE_SERVER_MODE, MULTI_SERVER_MODE
 from scat.server import ScatServer
 
 
@@ -16,7 +15,7 @@ class Commands:
         return 'create project {} path: {}'.format(name, path)
 
     def runserver(self, server_name='', mode=''):
-        from scat.master import Master
+        from scat.distributed.master import Master
         if mode == "single":
             if server_name == "master":
                 mode = MASTER_SERVER_MODE

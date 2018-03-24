@@ -1,37 +1,52 @@
-# coding: utf-8
+from twisted.spread import pb
+from twisted.internet import reactor
 
-"""
-@author: 武明辉 
-@time: 2018/2/4 10:04
-"""
-from scat.rpc.client import AsyncRPCClient
+from scat.service import Service
 
 
-def callRemote(obj, func_name, *args, **kw):
-    return obj.callRemote(func_name, *args, **kw)
+def call_remote(obj, func_name, *args, **kwargs):
+    return obj.callRemote(func_name, *args, **kwargs)
 
 
-class RemoteObject(object):
-    """远程调用对象"""
+class ProxyReference(pb.Referenceable):
+    def __init__(self):
+        self._service = Service('proxy')
+
+    def add_service(self, service):
+        self._service = service
+
+    def remote_call_child(self, command, *arg, **kw):
+        return self._service.call_target(command, *arg, **kw)
+
+
+class RemoteObject:
+    """
+    remote node include master and RMI root node
+    """
     def __init__(self, name):
         self.name = name
-        self.addr = None
-        self.client = AsyncRPCClient()
+        self._factory = pb.PBClientFactory()
+        self._reference = ProxyReference()
+        self._addr = None
 
     def connect(self, addr):
-        """初始化远程调用对象"""
-        self.addr = addr
-        self.client.start(addr[0], addr[1])
-        self.client.delegate.regist_node(self.name)
+        self._addr = addr
+        reactor.connectTCP(addr[0], addr[1], self._factory)
+        self.register()
+
+    def register(self):
+        defered_remote = self._factory.getRootObject()
+        defered_remote.addCallback(call_remote, 'register', self.name, self._reference)
 
     def reconnect(self):
-        """重新连接"""
-        self.connect(self.addr)
+        self.connect(self._addr)
 
-    def addServiceChannel(self, service):
-        """设置引用对象"""
-        self.client.addService(service)
+    def add_service_channel(self, service):
+        self._reference.addService(service)
+
+    def call_remote(self, command_id, *args, **kw):
+        defered_remote = self._factory.getRootObject()
+        return defered_remote.addCallback(call_remote, 'call_target', command_id, *args, **kw)
 
 
-if __name__ == '__main__':
-    pass
+

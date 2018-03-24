@@ -8,35 +8,35 @@ MASTER = {
 }
 
 SERVERS = {
-    'account': {
-        'net_port': 10000,
-        'net_protocol': 'tcp',
-        'db': True,
-        'mem': True,
-        'app': 'app.account_server',
-        'log': 'logs/account.log'
-    },
+    # 'account': {
+    #     'net_port': 10000,
+    #     'net_protocol': 'tcp',
+    #     'db': True,
+    #     'mem': True,
+    #     'server': 'servers.account_server',
+    #     'log': 'logs/account.log'
+    # },
     'hall_1': {
         'name': '三组广场',
         'root_port': 10001,
         'web_port': 10002,
-        'app': 'app.hall_server',
+        'server': 'servers.hall_server',
         'log': 'logs/hall.log'
     },
-    'game_1': {
-        'net_port': 10003,
-        'app': 'app.game_server',
-        'log': 'logs/game.log',
-        'db': True,
-        'mem': True,
-        'reload': 'app/game/reload',
-        'remote_list': [
-            {
-                'root_port': 10001,
-                'root_name': 'hall_1'
-            }
-        ],
-    }
+    # 'game_1': {
+    #     'net_port': 10003,
+    #     'app': 'servers.game_server',
+    #     'log': 'logs/game.log',
+    #     'db': True,
+    #     'mem': True,
+    #     'reload': 'app/game/reload',
+    #     'remote_list': [
+    #         {
+    #             'root_port': 10001,
+    #             'root_name': 'hall_1'
+    #         }
+    #     ],
+    # }
 }
 
 DB = {
@@ -54,3 +54,4 @@ MEMCACHED = {
     ],
     'hostname': 'texas'
 }
+

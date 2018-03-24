@@ -10,8 +10,8 @@ class Child:
     """
     子节点对象
     """
-    def __init__(self, child_id, name, transport=None):
-        self.id = child_id
+    def __init__(self, id, name, transport=None):
+        self.id = id
         self.name = name
         self.transport = transport
 
@@ -23,7 +23,7 @@ class Child:
         self.transport.call_remote(*args, **kwargs)
 
 
-class ChildsManager(object):
+class ChildManager:
     """子节点管理器"""
     def __init__(self):
         self._childs = {}
@@ -59,7 +59,7 @@ class ChildsManager(object):
             print(str(e))
 
     def drop_child_by_id(self, child_id):
-        """删除一个child 节点
+        """ 删除一个child 节点
         @param childId: Child ID 
         """
         try:
@@ -85,6 +85,15 @@ class ChildsManager(object):
             return
         return child.callbackChild(*args, **kw)
 
+    def generate_child_id(self):
+        return max(self._childs) + 1 if self._childs else 0
+
+    def get_child_by_session_id(self, session_id):
+        """根据sessionID获取child节点信息"""
+        for child in self._childs.values():
+            if child.transport.broker.transport.sessionno == session_id:
+                return child
+        return None
 
 if __name__ == '__main__':
     pass
