@@ -73,15 +73,11 @@ class PBRoot(pb.Root):
         self.child_manager.drop_child_by_id(child_id)
 
     def call_child(self, key, *args, **kwargs):
-        """ 调用子节点的接口
-            @param childId: int 子节点的id
+        """
+            @param childId: int
             return Defered Object
         """
         return self.child_manager.call_child(key, *args, **kwargs)
 
     def call_child_by_name(self, child_name, *args, **kw):
-        """调用子节点的接口
-        @param childId: int 子节点的id
-        return Defered Object
-        """
         return self.child_manager.call_child_by_name(child_name, *args, **kw)

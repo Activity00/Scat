@@ -74,7 +74,7 @@ class ChildManager:
         if not child:
             print("child %s doesn't exists" % child_id)
             return
-        return child.callbackChild(*args, **kw)
+        return child.callback_child(*args, **kw)
 
     def call_child_by_name(self, child_name, *args, **kw):
         """调用子节点的接口

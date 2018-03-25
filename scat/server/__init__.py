@@ -85,8 +85,8 @@ class ScatServer:
             importlib.import_module(server)
 
         for cnf in remote_list:
-            # self.remote[cnf.get('root_name')] = RemoteObject(self.server_name)
-            pass
+            name = cnf.get('root_name')
+            self.remote[name] = RemoteObject(self.server_name)
 
     def start(self):
         self.config()

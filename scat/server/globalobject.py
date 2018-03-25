@@ -14,3 +14,6 @@ class GlobalObject(metaclass=Singleton):
         self.remote = {}
         self.net = None
 
+        self.remote_map = {}  # for master mapping remote
+
+

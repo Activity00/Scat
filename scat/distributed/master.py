@@ -77,26 +77,33 @@ class Master:
 
     @staticmethod
     def do_child_connect(name, transport):
-        """when server node connect to master excuted
         """
+        when server node connect to master deal
+        :param name: server name
+        :param transport: server transport
+        :return:
+        """
+        server_config = settings.SERVERS.get(name, {})
 
-        server_config = GlobalObject().json_config.get('servers', {}).get(name, {})
-        remoteport = server_config.get('remoteport', [])
-        child_host = transport.broker.transport.client[0]
-        root_list = [rootport.get('rootname') for rootport in remoteport]
-        GlobalObject().remote_map[name] = {"host": child_host, "root_list": root_list}
-        # 通知有需要连的node节点连接到此root节点
-        for servername, remote_list in GlobalObject().remote_map.items():
-            remote_host = remote_list.get("host", "")
-            remote_name_host = remote_list.get("root_list", "")
+        remote_list = server_config.get('remote_list', [])
+        root_list = [root.get('root_name') for root in remote_list]
+
+        child_host = transport.broker.transport.client[0]  # get server host str
+
+        GlobalObject().remote_map[name] = {'host': child_host, 'root_list': root_list}
+        # notify node who want to connect to this node.
+        for server_name, remote_list in GlobalObject().remote_map.items():
+            remote_host = remote_list.get('host', '')
+            remote_name_host = remote_list.get('root_list', '')
             if name in remote_name_host:
-                GlobalObject().root.callChild(servername, "remote_connect", name, remote_host)
+                GlobalObject().root.call_child_by_name(server_name, 'remote_connect', name, remote_host)
+
         # 查看当前是否有可供连接的root节点
         master_node_list = GlobalObject().remote_map.keys()
         for root_name in root_list:
             if root_name in master_node_list:
                 root_host = GlobalObject().remote_map[root_name]['host']
-                GlobalObject().root.callChild(name, "remote_connect", root_name, root_host)
+                GlobalObject().root.call_child_by_name(name, "remote_connect", root_name, root_host)
 
     @staticmethod
     def do_child_lost_connect(child_id):
