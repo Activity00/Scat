@@ -6,6 +6,9 @@
 """
 from twisted.internet.error import ReactorAlreadyInstalledError
 import tornado.platform.twisted
+
+from scat.utils.logutil import ScatLog
+
 try:
     tornado.platform.twisted.install()
 except ReactorAlreadyInstalledError:
@@ -32,13 +35,15 @@ if not setting_str:
     raise Exception
 settings = importlib.import_module(setting_str)
 
+logger = ScatLog.get_logger()
+
 
 class ScatServer:
     """ it can be used for single server """
     def __init__(self, server_name):
         self.server_name = server_name
         self.master_remote = None   # master Node
-        self.remote = {}
+        self.remote = {}  # the dict this server connected to. {'server_name': ScatServer}
 
     def config(self):
         """
@@ -90,7 +95,7 @@ class ScatServer:
 
     def start(self):
         self.config()
-        print(self.server_name, 'stared')
+        logger.info('{} started'.format(self.server_name))
         ioloop.IOLoop.current().start()
 
 if __name__ == '__main__':

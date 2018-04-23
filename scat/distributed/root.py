@@ -1,15 +1,14 @@
-from tornado.log import *
 from twisted.spread import pb
-from twisted.python import log
 from scat.distributed.child import Child, ChildManager
+from scat.utils.logutil import ScatLog
+
+logger = ScatLog.get_logger()
 
 
 class BilateralBroker(pb.Broker):
     def connectionLost(self, reason):
         client_id = self.transport.sessionno
-        log.msg("node [%d] losex" % client_id)
-        gen_log.info("node [%d] lose" % client_id)
-        print("node [%d] lose" % client_id)
+        logger.warning("node [%d] losed" % client_id)
         self.factory.root.drop_child_session_id(client_id)
         pb.Broker.connectionLost(self, reason)
 
@@ -34,8 +33,8 @@ class PBRoot(pb.Root):
         :param transport:
         :return:
         """
-        print('node [%s] register ready' % name)
-        log.msg('node [%s] register ready' % name)
+
+        logger.info('node [%s] register ready' % name)
         child = Child(self.child_manager.generate_child_id(), name, transport)
         self.child_manager.add_child(child)
         self.do_child_connect(name, transport)
@@ -66,7 +65,7 @@ class PBRoot(pb.Root):
         """删除子节点记录"""
         child = self.child_manager.get_child_by_session_id(session_id)
         if not child:
-            log.msg('not found session_id (%s) in method drop_child_session_id' % session_id)
+            logger.warning('not found session_id (%s) in method drop_child_session_id' % session_id)
             return
         child_id = child.id
         self.do_child_lost_connect(child_id)

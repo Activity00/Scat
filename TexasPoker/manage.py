@@ -3,7 +3,7 @@
 import os
 import sys
 
-# for write demo base Scat witch in same dir
+# TODO remove for write demo base Scat witch in same dir
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

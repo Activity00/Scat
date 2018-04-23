@@ -6,6 +6,7 @@
 """
 from twisted.internet.error import ReactorAlreadyInstalledError
 import tornado.platform.twisted
+
 try:
     tornado.platform.twisted.install()
 except ReactorAlreadyInstalledError:
@@ -18,16 +19,16 @@ import subprocess
 
 from tornado import ioloop
 from tornado.httpserver import HTTPServer
-from tornado.log import *
 from tornado.web import Application
 
 from scat.distributed.root import PBRoot, BilateralFactory
 from scat.server.globalobject import GlobalObject
 from scat.service import Service
 from scat.distributed import master_service
+from scat.utils.logutil import ScatLog
 
+logger = ScatLog.get_logger()
 
-logger = logging.getLogger(__name__)
 MULTI_SERVER_MODE = 1
 SINGLE_SERVER_MODE = 2
 MASTER_SERVER_MODE = 3
@@ -58,6 +59,9 @@ class Master:
         importlib.reload(master_service)
         GlobalObject().root.do_child_connect = self.do_child_connect
         GlobalObject().root.do_child_lost_connect = self.do_child_lost_connect
+        logger.info('Master started')
+        logger.info('Master web listened {}'.format(master_config['web_port']))
+        logger.info('Master web listened {}'.format(master_config['root_port']))
 
     def start(self, server_name, mode):
         if mode == MULTI_SERVER_MODE:
@@ -83,22 +87,26 @@ class Master:
         :param transport: server transport
         :return:
         """
+        # 1. connect to master and add to Master->remote_map({"name": {"host":"127.0.0.1"}, [root_list]})
         server_config = settings.SERVERS.get(name, {})
 
         remote_list = server_config.get('remote_list', [])
         root_list = [root.get('root_name') for root in remote_list]
 
         child_host = transport.broker.transport.client[0]  # get server host str
-
         GlobalObject().remote_map[name] = {'host': child_host, 'root_list': root_list}
-        # notify node who want to connect to this node.
+
+        # 2. notify node who want to connect to this node.
         for server_name, remote_list in GlobalObject().remote_map.items():
+            """
+            server_name: have connected to Master
+            """
             remote_host = remote_list.get('host', '')
             remote_name_host = remote_list.get('root_list', '')
             if name in remote_name_host:
                 GlobalObject().root.call_child_by_name(server_name, 'remote_connect', name, remote_host)
 
-        # 查看当前是否有可供连接的root节点
+        #  check if there is a root node to be connected.
         master_node_list = GlobalObject().remote_map.keys()
         for root_name in root_list:
             if root_name in master_node_list:
