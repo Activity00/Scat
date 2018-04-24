@@ -7,7 +7,9 @@
 from twisted.internet.error import ReactorAlreadyInstalledError
 import tornado.platform.twisted
 
-from scat.utils.logutil import ScatLog
+from scat.db.cacheclient import CacheUtil
+from scat.db.dbpool import DBPool
+from scat.utils.logutil import ScatLog, set_file_handler
 
 try:
     tornado.platform.twisted.install()
@@ -25,7 +27,7 @@ from tornado.web import Application
 from scat.distributed.node import RemoteObject
 from scat.distributed.root import PBRoot, BilateralFactory
 from scat.server.connection import NetConnection
-from scat.server.globalobject import GlobalObject
+from scat import ScatObject
 from scat.server.handler.net_handler import WebSocketNetHandler, NetHandler
 from scat.server.netserver import NetServer
 from scat.service import Service
@@ -55,12 +57,17 @@ class ScatServer:
 
         server_config = settings.SERVERS[self.server_name]
         master_config = settings.MASTER
+        db_config = settings.DB
+        cache_config = settings.CACHE
 
         net_port = server_config.get('net_port')
         web_port = server_config.get('web_port')
         server = server_config.get('server')
         remote_list = server_config.get('remote_list', [])  # remote node list
         root_port = server_config.get('root_port')
+        log_path = server_config.get('log')
+        sopport_db = server_config.get('db')
+        sopport_cache = server_config.get('cache')
 
         if root_port:
             root = PBRoot(Service("root_service"))
@@ -70,13 +77,16 @@ class ScatServer:
             app = Application()
             http_server = HTTPServer(app)
             http_server.listen(web_port)
-            GlobalObject().web_root = app
+            ScatObject.web_root = app
 
         if net_port:
             net = NetHandler()
             server = NetServer(net)
             server.listen(net_port)
-            GlobalObject().net = net
+            ScatObject.net = net
+
+        if log_path:
+            set_file_handler(log_path)
 
         if master_config:
             master_port = master_config.get('root_port')
@@ -84,7 +94,16 @@ class ScatServer:
             self.master_remote = RemoteObject(self.server_name)
             addr = ('localhost', master_port) if not master_host else (master_host, master_port)
             self.master_remote.connect(addr)
-            GlobalObject().master_remote = self.master_remote
+            ScatObject.master_remote = self.master_remote
+
+        if sopport_db and db_config:
+            logger.debug(str(db_config))
+            DBPool.init_pool(**db_config)
+
+        if sopport_cache and cache_config:
+            urls = cache_config.get('urls')
+            host_name = str(cache_config.get('host_name'))
+            CacheUtil.init_pool(urls, host_name)
 
         if server:
             importlib.import_module(server)

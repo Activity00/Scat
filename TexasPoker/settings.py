@@ -21,22 +21,24 @@ SERVERS = {
         'root_port': 10001,
         'web_port': 10002,
         'server': 'servers.hall_server',
-        'log': 'logs/hall.log'
+        'log': 'logs/hall.log',
+        'db': True,
+        'cache': True,
     },
-    # 'game_1': {
-    #     'net_port': 10003,
-    #     'app': 'servers.game_server',
-    #     'log': 'logs/game.log',
-    #     'db': True,
-    #     'mem': True,
-    #     'reload': 'app/game/reload',
-    #     'remote_list': [
-    #         {
-    #             'root_port': 10001,
-    #             'root_name': 'hall_1'
-    #         }
-    #     ],
-    # }
+    'game_1': {
+        'web_port': 10003,  # web_socket
+        'server': 'servers.game_server',
+        'log': 'logs/game.log',
+        'db': True,
+        'mem': True,
+        'reload': 'app/game/reload',
+        'remote_list': [
+            {
+                'root_port': 10001,
+                'root_name': 'hall_1'
+            }
+        ],
+    }
 }
 
 DB = {
@@ -48,10 +50,10 @@ DB = {
     "charset": 'utf8'
 }
 
-MEMCACHED = {
+CACHE = {
     'urls': [
-        '127.0.0.1:11211'
+        '127.0.0.1:6379'
     ],
-    'hostname': 'texas'
+    'host_name': 'texas'
 }
 

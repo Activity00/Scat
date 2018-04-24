@@ -5,7 +5,7 @@
 @time: 2018/2/4 18:40
 """
 from tornado.web import Application
-from scat.server.globalobject import GlobalObject
+from scat import ScatObject
 
 
 def root_handler(cls):
@@ -13,7 +13,7 @@ def root_handler(cls):
 
 
 def net_handler(cls):
-    net = GlobalObject().net
+    net = ScatObject.net
     if isinstance(net, Application):
         for k, v in cls.__dict__.items():
             if not k.startswith('_'):

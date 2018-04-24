@@ -9,21 +9,21 @@ from twisted.python import log
 import tornado.web
 import tornado.websocket
 import threading
-from scat.server.globalobject import GlobalObject
+from scat import ScatObject
 
 
 def web_service(cls):
-    if GlobalObject().web_root:
+    if ScatObject.web_root:
         url = getattr(cls, 'URL', None)
         handler_cls = type(cls.__name__, (tornado.web.RequestHandler,), dict(cls.__dict__))
-        GlobalObject().web_root.add_handlers(r'.*$', [(url or r'/{}/'.format(handler_cls.__name__.lower()), handler_cls), ])
+        ScatObject.web_root.add_handlers(r'.*$', [(url or r'/{}/'.format(handler_cls.__name__.lower()), handler_cls), ])
 
 
 def ws_service(cls):
-    if GlobalObject().web_root:
+    if ScatObject.web_root:
         url = getattr(cls, 'URL', None)
-        handler_cls = type(cls.__name__, (tornado.web.RequestHandler,), dict(cls.__dict__))
-        GlobalObject().web_root.add_handlers(r'.*$', [(url or r'/{}/'.format(handler_cls.__name__.lower()), handler_cls), ])
+        handler_cls = type(cls.__name__, (tornado.websocket.WebSocketHandler,), dict(cls.__dict__))
+        ScatObject.web_root.add_handlers(r'.*$', [(url or r'/{}/'.format(handler_cls.__name__.lower()), handler_cls), ])
 
 
 class Service:

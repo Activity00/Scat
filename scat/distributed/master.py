@@ -22,7 +22,7 @@ from tornado.httpserver import HTTPServer
 from tornado.web import Application
 
 from scat.distributed.root import PBRoot, BilateralFactory
-from scat.server.globalobject import GlobalObject
+from scat import ScatObject
 from scat.service import Service
 from scat.distributed import master_service
 from scat.utils.logutil import ScatLog
@@ -44,6 +44,7 @@ class Master:
         pass
 
     def master_app(self):
+        logger.info('Master starting...')
         master_config = settings.MASTER
 
         root = PBRoot(Service("root_service"))
@@ -53,15 +54,15 @@ class Master:
         http_server = HTTPServer(web_root)
         http_server.listen(master_config['web_port'])
 
-        GlobalObject().root = root
-        GlobalObject().web_root = web_root
+        ScatObject.root = root
+        ScatObject.web_root = web_root
 
         importlib.reload(master_service)
-        GlobalObject().root.do_child_connect = self.do_child_connect
-        GlobalObject().root.do_child_lost_connect = self.do_child_lost_connect
-        logger.info('Master started')
+        ScatObject.root.do_child_connect = self.do_child_connect
+        ScatObject.root.do_child_lost_connect = self.do_child_lost_connect
+
         logger.info('Master web listened {}'.format(master_config['web_port']))
-        logger.info('Master web listened {}'.format(master_config['root_port']))
+        logger.info('Master root listened {}'.format(master_config['root_port']))
 
     def start(self, server_name, mode):
         if mode == MULTI_SERVER_MODE:
@@ -94,29 +95,28 @@ class Master:
         root_list = [root.get('root_name') for root in remote_list]
 
         child_host = transport.broker.transport.client[0]  # get server host str
-        GlobalObject().remote_map[name] = {'host': child_host, 'root_list': root_list}
+        ScatObject.remote_map[name] = {'host': child_host, 'root_list': root_list}
 
         # 2. notify node who want to connect to this node.
-        for server_name, remote_list in GlobalObject().remote_map.items():
+        for server_name, remote_list in ScatObject.remote_map.items():
             """
             server_name: have connected to Master
             """
             remote_host = remote_list.get('host', '')
             remote_name_host = remote_list.get('root_list', '')
             if name in remote_name_host:
-                GlobalObject().root.call_child_by_name(server_name, 'remote_connect', name, remote_host)
+                ScatObject.root.call_child_by_name(server_name, 'remote_connect', name, remote_host)
 
         #  check if there is a root node to be connected.
-        master_node_list = GlobalObject().remote_map.keys()
+        master_node_list = ScatObject.remote_map.keys()
         for root_name in root_list:
             if root_name in master_node_list:
-                root_host = GlobalObject().remote_map[root_name]['host']
-                GlobalObject().root.call_child_by_name(name, "remote_connect", root_name, root_host)
+                root_host = ScatObject.remote_map[root_name]['host']
+                ScatObject.root.call_child_by_name(name, "remote_connect", root_name, root_host)
 
     @staticmethod
     def do_child_lost_connect(child_id):
         try:
-            del GlobalObject().remote_map[child_id]
+            del ScatObject.remote_map[child_id]
         except Exception as e:
-            # log.msg(str(e))
-            print(str(e))
+            logger.error(str(e))

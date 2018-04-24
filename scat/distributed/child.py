@@ -4,14 +4,17 @@
 @author: 武明辉 
 @time: 2018/1/27 13:18
 """
+from scat.utils.logutil import ScatLog
+
+logger = ScatLog.get_logger()
 
 
 class Child:
     """
     子节点对象
     """
-    def __init__(self, id, name, transport=None):
-        self.id = id
+    def __init__(self, _id, name, transport=None):
+        self.id = _id
         self.name = name
         self.transport = transport
 
@@ -35,7 +38,7 @@ class ChildManager:
     def get_child_by_name(self, child_name):
         """根据节点的名称获取节点实例"""
         for key, child in self._childs.items():
-            if child.getName() == child_name:
+            if child.name == child_name:
                 return self._childs[key]
         return None
 
@@ -81,7 +84,7 @@ class ChildManager:
         """
         child = self.get_child_by_name(child_name)
         if not child:
-            print("child %s doesn't exists" % child_name)
+            logger.warning("child %s doesn't exists" % child_name)
             return
         return child.callbackChild(*args, **kw)
 

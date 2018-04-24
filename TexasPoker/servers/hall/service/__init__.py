@@ -6,3 +6,4 @@
 """
 
 from .webservice import *
+from .rootservice import *

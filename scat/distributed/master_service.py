@@ -4,7 +4,7 @@
 @author: 武明辉 
 @time: 2018/3/24 15:37
 """
-from scat.server import GlobalObject
+from scat import ScatObject
 from scat.service import web_service
 
 
