@@ -97,7 +97,7 @@ class Master:
         child_host = transport.broker.transport.client[0]  # get server host str
         ScatObject.remote_map[name] = {'host': child_host, 'root_list': root_list}
 
-        # 2. notify node who want to connect to this node.
+        # 2. notify node that want to connect to this node.
         for server_name, remote_list in ScatObject.remote_map.items():
             """
             server_name: have connected to Master

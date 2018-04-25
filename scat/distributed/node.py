@@ -10,13 +10,13 @@ def call_remote(obj, func_name, *args, **kwargs):
 
 class ProxyReference(pb.Referenceable):
     def __init__(self):
-        self._service = Service('proxy')
+        self.service = Service('proxy')
 
     def add_service(self, service):
-        self._service = service
+        self.service = service
 
     def remote_call_child(self, command, *arg, **kw):
-        return self._service.call_target(command, *arg, **kw)
+        return self.service.call_target(command, *arg, **kw)
 
 
 class RemoteObject:
@@ -28,6 +28,9 @@ class RemoteObject:
         self._factory = pb.PBClientFactory()
         self._reference = ProxyReference()
         self._addr = None
+
+    def get_service(self):
+        return self._reference.service
 
     def connect(self, addr):
         self._addr = addr

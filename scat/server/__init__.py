@@ -46,6 +46,7 @@ class ScatServer:
         self.server_name = server_name
         self.master_remote = None   # master Node
         self.remote = {}  # the dict this server connected to. {'server_name': ScatServer}
+        self.remote_list = []
 
     def config(self):
         """
@@ -62,11 +63,13 @@ class ScatServer:
 
         net_port = server_config.get('net_port')
         web_port = server_config.get('web_port')
-        remote_list = server_config.get('remote_list', [])  # remote node list
+        self.remote_list = server_config.get('remote_list', [])  # remote node list
         root_port = server_config.get('root_port')
+        app_config = server_config.get('app')
         log_path = server_config.get('log')
         support_db = server_config.get('db')
         support_cache = server_config.get('cache')
+        reload_module = server_config.get('reload')
 
         if root_port:
             root = PBRoot(Service("root_service"))
@@ -85,10 +88,30 @@ class ScatServer:
             ScatObject.net = net
 
         if log_path:
-
             set_file_handler(log_path)
 
-        if master_config:
+        if support_db and db_config:
+            logger.debug(str(db_config))
+            DBPool.init_pool(**db_config)
+
+        if support_cache and cache_config:
+            host = cache_config.get('host')
+            port = cache_config.get('port')
+            # host_name = str(cache_config.get('host_name'))
+            CacheUtil.init_pool(host, port)
+
+        if reload_module:
+            path_list = reload_module.split('.')
+            ScatObject.reload_module = importlib.__import__(reload_module, fromlist=path_list[:1])
+
+        for cnf in self.remote_list:
+            name = cnf.get('root_name')
+            self.remote[name] = RemoteObject(self.server_name)
+
+        ScatObject.remote_connect = self.remote_connect
+        if not master_config:
+            logger.warning('this node have no master config')
+        else:
             master_port = master_config.get('root_port')
             master_host = master_config.get('root_host')
             self.master_remote = RemoteObject(self.server_name)
@@ -96,28 +119,30 @@ class ScatServer:
             self.master_remote.connect(addr)
             ScatObject.master_remote = self.master_remote
 
-        if support_db and db_config:
-            logger.debug(str(db_config))
-            DBPool.init_pool(**db_config)
+        importlib.import_module('scat.server.admin')
 
-        if support_cache and cache_config:
-            urls = cache_config.get('urls')
-            host_name = str(cache_config.get('host_name'))
-            CacheUtil.init_pool(urls, host_name)
-
-        try:
-            importlib.import_module(self.server_name + '.initialization')
-        except ImportError:
-            logger.warning('{} has no initialization.py so init will be ignore.'.format(self.server_name))
+        if app_config:
+            try:
+                importlib.import_module(app_config + '.initialization')
+            except ImportError:
+                logger.warning('{} has no initialization.py so init will be ignore.'.format(self.server_name))
 
         try:
             importlib.import_module(self.server_name + '.service')
         except ImportError:
             logger.warning('{} has no service.py so init will be ignore.'.format(self.server_name))
 
-        for cnf in remote_list:
-            name = cnf.get('root_name')
-            self.remote[name] = RemoteObject(self.server_name)
+    def remote_connect(self, remote_name, remote_host):
+        for cnf in self.remote_list:
+            _name = cnf.get('root_name')
+            if remote_name == _name:
+                port = cnf.get('root_port')
+                if not remote_host:
+                    addr = ('localhost', port)
+                else:
+                    addr = (remote_host, port)
+                self.remote[remote_name].connect(addr)
+                break
 
     def start(self):
         self.config()

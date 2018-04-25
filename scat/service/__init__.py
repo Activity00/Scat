@@ -12,6 +12,10 @@ import threading
 from scat import ScatObject
 
 
+def master_service(target):
+    ScatObject.master_remote.get_service().map_target(target)
+
+
 def web_service(cls):
     if ScatObject.web_root:
         url = getattr(cls, 'URL', None)

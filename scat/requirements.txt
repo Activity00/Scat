@@ -3,3 +3,5 @@ redis==2.10.6
 SQLAlchemy==1.2.4
 tornado==4.5.2
 Twisted==17.9.0
+Alembic==0.9.9
+PyMySql==0.8.0

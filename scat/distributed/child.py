@@ -23,7 +23,7 @@ class Child:
         回调子节点接口
         :return:
         """
-        self.transport.call_remote(*args, **kwargs)
+        return self.transport.callRemote('call_child', *args, **kwargs)
 
 
 class ChildManager:
@@ -86,7 +86,7 @@ class ChildManager:
         if not child:
             logger.warning("child %s doesn't exists" % child_name)
             return
-        return child.callbackChild(*args, **kw)
+        return child.callback_child(*args, **kw)
 
     def generate_child_id(self):
         return max(self._childs) + 1 if self._childs else 0
