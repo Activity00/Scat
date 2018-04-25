@@ -62,12 +62,11 @@ class ScatServer:
 
         net_port = server_config.get('net_port')
         web_port = server_config.get('web_port')
-        server = server_config.get('server')
         remote_list = server_config.get('remote_list', [])  # remote node list
         root_port = server_config.get('root_port')
         log_path = server_config.get('log')
-        sopport_db = server_config.get('db')
-        sopport_cache = server_config.get('cache')
+        support_db = server_config.get('db')
+        support_cache = server_config.get('cache')
 
         if root_port:
             root = PBRoot(Service("root_service"))
@@ -86,6 +85,7 @@ class ScatServer:
             ScatObject.net = net
 
         if log_path:
+
             set_file_handler(log_path)
 
         if master_config:
@@ -96,17 +96,24 @@ class ScatServer:
             self.master_remote.connect(addr)
             ScatObject.master_remote = self.master_remote
 
-        if sopport_db and db_config:
+        if support_db and db_config:
             logger.debug(str(db_config))
             DBPool.init_pool(**db_config)
 
-        if sopport_cache and cache_config:
+        if support_cache and cache_config:
             urls = cache_config.get('urls')
             host_name = str(cache_config.get('host_name'))
             CacheUtil.init_pool(urls, host_name)
 
-        if server:
-            importlib.import_module(server)
+        try:
+            importlib.import_module(self.server_name + '.initialization')
+        except ImportError:
+            logger.warning('{} has no initialization.py so init will be ignore.'.format(self.server_name))
+
+        try:
+            importlib.import_module(self.server_name + '.service')
+        except ImportError:
+            logger.warning('{} has no service.py so init will be ignore.'.format(self.server_name))
 
         for cnf in remote_list:
             name = cnf.get('root_name')

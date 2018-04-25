@@ -7,6 +7,7 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
+import os
 import tornado.log
 from tornado.log import LogFormatter
 
@@ -26,7 +27,10 @@ class ScatLogUtil:
 
 
 def set_file_handler(log_path):
-    fh = TimedRotatingFileHandler(log_path, when='M', interval=1, backupCount=30)
+    path = os.path.dirname(log_path)
+    if not os.path.exists(path):
+        os.mkdir(path)
+    fh = TimedRotatingFileHandler(log_path, when='D', interval=1, backupCount=30)
     fh.setFormatter(FORMATTER)
     logging.getLogger().addHandler(fh)
 
