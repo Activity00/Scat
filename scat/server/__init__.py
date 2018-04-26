@@ -73,6 +73,7 @@ class ScatServer:
 
         if root_port:
             root = PBRoot(Service("root_service"))
+            ScatObject.root = root
             reactor.listenTCP(root_port, BilateralFactory(root))
 
         if web_port:
@@ -107,6 +108,7 @@ class ScatServer:
         for cnf in self.remote_list:
             name = cnf.get('root_name')
             self.remote[name] = RemoteObject(self.server_name)
+        ScatObject.remote = self.remote
 
         ScatObject.remote_connect = self.remote_connect
         if not master_config:

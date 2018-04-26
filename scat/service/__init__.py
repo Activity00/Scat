@@ -19,15 +19,25 @@ def master_service(target):
 def web_service(cls):
     if ScatObject.web_root:
         url = getattr(cls, 'URL', None)
-        handler_cls = type(cls.__name__, (tornado.web.RequestHandler,), dict(cls.__dict__))
+        base = cls.__base__
+        handler_cls = type(cls.__name__, (base if base else tornado.web.RequestHandler,), dict(cls.__dict__))
         ScatObject.web_root.add_handlers(r'.*$', [(url or r'/{}/'.format(handler_cls.__name__.lower()), handler_cls), ])
 
 
 def ws_service(cls):
     if ScatObject.web_root:
         url = getattr(cls, 'URL', None)
-        handler_cls = type(cls.__name__, (tornado.websocket.WebSocketHandler,), dict(cls.__dict__))
+        base = cls.__base__
+        handler_cls = type(cls.__name__, (base if base else tornado.websocket.WebSocketHandler,), dict(cls.__dict__))
         ScatObject.web_root.add_handlers(r'.*$', [(url or r'/{}/'.format(handler_cls.__name__.lower()), handler_cls), ])
+
+
+class RemoteService:
+    def __init__(self, remote_name):
+        self.remote_name = remote_name
+
+    def __call__(self, target):
+        ScatObject.remote[self.remote_name].get_service().map_target(target)
 
 
 class Service:
