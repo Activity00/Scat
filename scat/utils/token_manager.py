@@ -14,6 +14,9 @@ class TokenManager:
         self.tokens = {}    # token: token_info
         self.player_token_mapping = {}    # player_id: token
 
+    def exist(self, token):
+        return token in self.tokens
+
     def produce_token(self, player_id, life_time):
         token = self.player_token_mapping.get(player_id)
         if token:
@@ -45,6 +48,7 @@ class TokenManager:
 
     def get_token_from_user_id(self, player_id):
         return self.player_token_mapping.get(player_id)
+
 
 if __name__ == '__main__':
     pass
