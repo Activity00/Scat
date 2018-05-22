@@ -3,7 +3,7 @@
 import os
 
 if __name__ == '__main__':
-    os.environ.setdefault("SCAT_SETTINGS_MODULE", "texas.settings")
+    os.environ.setdefault("SCAT_SETTINGS_MODULE", "${ProjectName}.settings")
     try:
         from scat.commands import execute_from_command_line
     except ImportError:
