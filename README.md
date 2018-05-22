@@ -26,3 +26,11 @@ Scat is also suitable for real-time web applications with tornado.
 ~~~
 
 ~~~
+## service wrapper 
+> master_service
+
+> web_service
+
+> ws_service
+
+> RemoteService

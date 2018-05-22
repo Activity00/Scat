@@ -3,6 +3,11 @@
 """
 @author: 武明辉 
 @time: 2018/1/21 14:04
+
+master_service
+web_service
+ws_service
+RemoteService
 """
 from twisted.internet import defer, threads
 from twisted.python import log
@@ -14,6 +19,10 @@ from scat import ScatObject
 
 def master_service(target):
     ScatObject.master_remote.get_service().map_target(target)
+
+
+def root_service(target):
+    ScatObject.root.get_service().mapTarget(target)
 
 
 def web_service(cls):
