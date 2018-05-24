@@ -22,7 +22,7 @@ def master_service(target):
 
 
 def root_service(target):
-    ScatObject.root.get_service().mapTarget(target)
+    ScatObject.root.service.map_target(target)
 
 
 def web_service(cls):
