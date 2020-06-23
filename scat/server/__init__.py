@@ -4,6 +4,8 @@
 @author: 武明辉 
 @time: 2018/1/20 14:30
 """
+import asyncio
+
 from twisted.internet.error import ReactorAlreadyInstalledError
 import tornado.platform.twisted
 
@@ -146,10 +148,22 @@ class ScatServer:
                 self.remote[remote_name].connect(addr)
                 break
 
+    async def main(self):
+        server = await asyncio.start_server(
+            handle_echo, '127.0.0.1', 8888)
+
+        addr = server.sockets[0].getsockname()
+        print(f'Serving on {addr}')
+
+        async with server:
+            await server.serve_forever()
+
     def start(self):
         self.config()
         logger.info('{} started'.format(self.server_name))
-        ioloop.IOLoop.current().start()
+
+        asyncio.run()
+
 
 if __name__ == '__main__':
     pass

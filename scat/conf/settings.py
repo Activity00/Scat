@@ -66,4 +66,3 @@ CACHE = {
     'port': 6379,
     'host_name': 'texas'
 }
-

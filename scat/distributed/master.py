@@ -1,29 +1,17 @@
-# coding: utf-8
-
 """
 @author: 武明辉 
 @time: 2018/1/20 14:31
 """
-from aiohttp import web
-from twisted.internet.error import ReactorAlreadyInstalledError
-import tornado.platform.twisted
-
-try:
-    tornado.platform.twisted.install()
-except ReactorAlreadyInstalledError:
-    pass
-from twisted.internet import reactor
 
 import importlib
 import os
 import subprocess
 
-from tornado import ioloop
-from tornado.httpserver import HTTPServer
-from tornado.web import Application
+import asyncio
 
+from scat.conf import settings
 from scat.distributed.root import PBRoot, BilateralFactory
-from scat import ScatObject
+# from scat import ScatObject
 from scat.service import Service
 from scat.distributed import master_service
 from scat.utils.logutil import ScatLog
@@ -33,11 +21,6 @@ logger = ScatLog.get_logger()
 MULTI_SERVER_MODE = 1
 SINGLE_SERVER_MODE = 2
 MASTER_SERVER_MODE = 3
-
-setting_str = os.environ.get('SCAT_SETTINGS_MODULE', None)
-if not setting_str:
-    raise Exception
-settings = importlib.import_module(setting_str)
 
 
 class Master:
