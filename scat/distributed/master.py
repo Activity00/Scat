@@ -4,6 +4,7 @@
 @author: 武明辉 
 @time: 2018/1/20 14:31
 """
+from aiohttp import web
 from twisted.internet.error import ReactorAlreadyInstalledError
 import tornado.platform.twisted
 
@@ -40,9 +41,6 @@ settings = importlib.import_module(setting_str)
 
 
 class Master:
-    def __init__(self):
-        pass
-
     def master_app(self):
         logger.info('Master starting...')
         master_config = settings.MASTER
@@ -50,10 +48,7 @@ class Master:
         root = PBRoot(Service("root_service"))
         reactor.listenTCP(master_config['root_port'], BilateralFactory(root))
 
-        web_root = Application()  # web use a application contains handler
-        http_server = HTTPServer(web_root)
-        http_server.listen(master_config['web_port'])
-
+        web_root = web.Application()  # web use a application contains handler
         ScatObject.root = root
         ScatObject.web_root = web_root
 
@@ -72,7 +67,8 @@ class Master:
                 cmds = 'python manage.py start_server %s' % server_name
                 subprocess.Popen(cmds, shell=False)
 
-            ioloop.IOLoop.current().start()
+            master_config = settings.MASTER
+            web.run_app(ScatObject.web_root, port=master_config['web_port'])
         elif mode == SINGLE_SERVER_MODE:
             cmds = 'python manage.py start_server %s' % server_name
             subprocess.Popen(cmds, shell=True)
