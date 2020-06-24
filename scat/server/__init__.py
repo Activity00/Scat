@@ -29,17 +29,9 @@ from tornado.web import Application
 from scat.distributed.node import RemoteObject
 from scat.distributed.root import PBRoot, BilateralFactory
 from scat.server.connection import NetConnection
-from scat import ScatObject
 from scat.server.handler.net_handler import WebSocketNetHandler, NetHandler
 from scat.server.netserver import NetServer
 from scat.service import Service
-
-setting_str = os.environ.get('SCAT_SETTINGS_MODULE', None)
-if not setting_str:
-    raise Exception
-settings = importlib.import_module(setting_str)
-
-logger = ScatLog.get_logger()
 
 
 class ScatServer:

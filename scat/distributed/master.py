@@ -11,7 +11,7 @@ import asyncio
 
 from scat.conf import settings
 from scat.distributed.root import PBRoot, BilateralFactory
-# from scat import ScatObject
+from scat import ScatObject
 from scat.service import Service
 from scat.distributed import master_service
 from scat.utils.logutil import ScatLog
